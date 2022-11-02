@@ -81,4 +81,4 @@ Please note [Routing Intent Policies](https://learn.microsoft.com/en-us/azure/vi
 
 - Video tutorial: https://youtu.be/wZ3DBO7hmoI
 
-![](images/2022-11-02-10-12-23.png)
+![](images/2022-11-02-10-12-23.png)-
