@@ -14,11 +14,11 @@ This reference to Azure Landing Zones (ALZ) and the Cloud Adoption Framework all
 
 Let us also now state another fundamental behaviour of the Azure SDN/VNet model today, that is, today, a Virtual Network must be contained with a single subscription. 
 
-But these two vectors togethers (subscription democratization, and VNet's being bound to a subscriptions) and the natural result is a proliferation in the quantity of Virtual Networks (VNets) that a customer has to wrangle with.
+Put these two vectors togethers (subscription democratization, and VNet's being bound to a subscriptions) and the natural result is a proliferation in the quantity of Virtual Networks (VNets) that a customer has to wrangle with.
 
 ## Azure SDN Limits
 
-To tee up our topology options section, we need to call-out some further limits in Azure today. Specifically a maximum of [500 Virtual Network Peerings per VNet](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#:~:text=Virtual%20network%20peerings%20per%20virtual%20network). (This means you cannot go beyond 500 Spokes VNets hanging off a single Hub VNets, whether that be customer-managed, or Azure Virtual WAN).
+To tee up our topology options section, we need to call-out some platform limits in Azure today. Specifically a maximum of [500 Virtual Network Peerings per VNet](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#:~:text=Virtual%20network%20peerings%20per%20virtual%20network). (This means you cannot go beyond 500 Spokes VNets hanging off a single Hub VNet, whether that be customer-managed, or Azure Virtual WAN).
 
 The next limit we need to be aware of, is that you can only specify [400 user-defined routes per UDR route table](User-defined routes per route table). Therefore if you are forcing traffic via a Virtual Appliance (Azure Firewall or NVA etc) within your Hub environment, this effectively reduces the number of Spokes you can support down to 400. (Every Spoke will have a minimum of one [VNet address space](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#:~:text=hop%20types%20follow%3A-,Virtual%20network,-%3A%20Routes%20traffic%20between), which will need to be reflected in a unique UDR line entry).
 
@@ -37,7 +37,7 @@ Generally when we deploy "Another hub", it normally represents another Azure reg
 - Each Hub requires it's own set of Network Services (Virtual Network Gateways, Firewalls, etc)
 - Ensuring optimal Spoke-Hub-Hub-Spoke routing. Just as with normal multi-region bow-tie ExpressRoute designs, you need to [ensure traffic between Hub's uses Global VNet Peering](https://learn.microsoft.com/en-us/azure/expressroute/virtual-network-connectivity-guidance). Therefore you are going to require separate ExpressRoute Circuits to ensure routes do not leak between hubs via an ExpressRoute Circuit. (You cannot use UDR to over-ride if you have more than 400 VNets remember.). 
 - Additional costs of multiple VNet peering hops (and the cost impact of the aforementioned additional network components)
-- Overall UDR complexity, remember VNet peering is not transitive, therefore your AZFW/NVA is doing the IP forwarding between VNets that are not directly peered
+- Overall UDR complexity, remember VNet peering is not transitive, therefore your an AZFW/NVA is doing the IP forwarding between VNets that are not directly peered
 
 ![](images/2022-11-02-09-28-58.png)
 
@@ -46,8 +46,10 @@ Generally when we deploy "Another hub", it normally represents another Azure reg
 If you wish to continue leveraging a single central hub for some shared services, including Virtual Network Gateways (E.g. ExpressRoute Gateway) then it is possible to combine Network Virtual Appliances with Azure Route Server, to build a "tiered VNet" design wherein the NVA appliances advertise summary/aggregate routes that represent the 2nd tier of indirect spokes.
 
 Considerations/notes:
-- TBC
-- TBC
+- NVA must be BGP aware (no AZFW)
+- HA complexity
+- ARS Routing prefix limits
+- Same double-hop VNet Peering charges
 
 ![](images/2022-11-02-10-02-11.png)
 
@@ -59,11 +61,15 @@ Virtual WAN makes it easy to deploy multiple hubs, and this now includes support
 
 We can also make use of common ExpressRoute circuits without hitting UDR limits with Global VNet Peering, as Azure Virtual WAN [Routing Preference](https://learn.microsoft.com/en-us/azure/virtual-wan/about-virtual-hub-routing-preference) takes care of the spoke-hub-hub-spoke routing for us. 
 
-Please note [Routing Intent Policies](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies) are required to enable the flow shown below using Firewalls within the Virtual WAN Hub. This feature is in preview today. Today, this design also will only work with Azure Firewall, as no other E/W Firewalls are currently available as NVA-in-hub partners.
+Please note [Routing Intent Policies](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies) are required to enable the flow shown below using Firewalls within the Virtual WAN Hub. This feature is in preview today. Today, this design also will only work with Azure Firewall, as no other E/W Firewalls are currently available as NVA-in-hub partners. (Some are on the way, E.g. Fortinet). (See NVA-in-hub official docs).
 
 ![](images/2022-11-02-10-08-54.png)
 
 ### [2b] Tiered VNets with Virtual WAN static routes
+
+This pattern, often referred to as the "tiered vnet" design, or using "indirect spokes" if somewhat common now, and allows the use of Azure Firwall in the Hub-VNet that hangs off Virtual WAN. The UDR complexity is relatively low, and you continue to benefit from using Azure Virtual WAN for Global Routing.
+
+Remember static routes, today, are locally signifcant in Virtual WAN so you will need a static route on every hub, for every Hub VNet that is connected, regardless of its region.
 
 - Daniel Mauser's lab  guide: https://github.com/dmauser/azure-virtualwan/tree/main/inter-region-nva
 
@@ -74,6 +80,8 @@ Please note [Routing Intent Policies](https://learn.microsoft.com/en-us/azure/vi
 ![](images/2022-11-02-10-14-03.png)
 
 ### [2b] Tiered VNets with Virtual WAN BGP Peering
+
+Same as [2a] but uses BGP between NVA (so no AZFW) and Azure VWAN Hub, removes need to static route config, also gives dynamic routing which is beneficial if you happent to not be using contiguous address spaces in the indirect spokes.
 
 - Daniel Mauser's lab  guide: https://github.com/dmauser/azure-virtualwan/tree/main/inter-region-nvabgp
 
