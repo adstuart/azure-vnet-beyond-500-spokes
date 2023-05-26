@@ -90,3 +90,11 @@ Same as [2a] but uses BGP between NVA (so no AZFW) and Azure VWAN Hub, removes n
 - Video tutorial: https://youtu.be/wZ3DBO7hmoI
 
 ![](images/2022-11-02-10-12-23.png)-
+
+## [3] Overlay-based designs
+
+An additional option is to connect the spokes to your hub Virtual Network with a technology other than VNet Peering, thereby removing this limit from your constraints. Whilst these designs come iwth significant cost, scale and performance considerations they do address the question at hand. Examples include:
+
+- Azure VNG Ipsec to Ipsec (PIP to PIP) connections wherein each Spoke has an Azure VNG
+- SD-WAN based designs wherein each Spoke has an SD-WAN NVA and connects back via PIP and MS backbone to centralised SDWAN appliances
+- Cloud-native overlays from companies such as Aviatrix (same as SD-WAN approach, but often with deeper integration in to native SDN constructs such as UDR/VNet)
