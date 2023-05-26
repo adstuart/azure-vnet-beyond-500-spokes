@@ -61,9 +61,11 @@ Virtual WAN makes it easy to deploy multiple hubs, and this now includes support
 
 We can also make use of common ExpressRoute circuits without hitting UDR limits with Global VNet Peering, as Azure Virtual WAN [Routing Preference](https://learn.microsoft.com/en-us/azure/virtual-wan/about-virtual-hub-routing-preference) takes care of the spoke-hub-hub-spoke routing for us. 
 
-Please note [Routing Intent Policies](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies) are required to enable the flow shown below using Firewalls within the Virtual WAN Hub. This feature is in preview today. Today, this design also will only work with Azure Firewall, as no other E/W Firewalls are currently available as NVA-in-hub partners. (Some are on the way, E.g. Fortinet). (See NVA-in-hub official docs).
+Please note [Routing Intent Policies](https://learn.microsoft.com/en-us/azure/virtual-wan/how-to-routing-policies) are required to enable the flow shown below using Firewalls within the Virtual WAN Hub. 
 
 ![](images/2022-11-02-10-08-54.png)
+
+(It is also to implement this design with centralised FW/VNG in the "core hub" only)
 
 ### [2b] Tiered VNets with Virtual WAN static routes
 
