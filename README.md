@@ -55,6 +55,10 @@ Considerations/notes:
 
 ## [2] Azure Virtual WAN based designs
 
+Be aware of the ER limits of #routes per connection > circuit/MSEE when considering these designs as VWAN will by default advertise all VNet address spaces within the common parent level VWAN, so beyond 1000 spokes you have another limit to consider -- Maximum number of IPv4 routes advertised from Azure private peering from the VNet address space
+
+The preview of Route-maps would help aleviate this - https://learn.microsoft.com/en-us/azure/virtual-wan/route-maps-how-to
+
 ### [2a] Multiple Hubs
 
 Virtual WAN makes it easy to deploy multiple hubs, and this now includes support for multiple hubs in the same Azure Region. We have some of the same considerations as [1a] such as cost and duplication of components, but the UDR complexity is greatly simplified.
