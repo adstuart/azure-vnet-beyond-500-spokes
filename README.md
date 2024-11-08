@@ -104,3 +104,10 @@ An additional option is to connect the spokes to your hub Virtual Network with a
 - Azure VNG Ipsec to Ipsec (PIP to PIP) connections wherein each Spoke has an Azure VNG
 - SD-WAN based designs wherein each Spoke has an SD-WAN NVA and connects back via PIP and MS backbone to centralised SDWAN appliances
 - Cloud-native overlays from companies such as Aviatrix (same as SD-WAN approach, but often with deeper integration in to native SDN constructs such as UDR/VNet)
+
+## [4] Azure Virtual Network Manager (AVNM)
+
+Connected groups within AVNM now support up to 1000 VNets. As per here https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-limitations#limitations-for-peerings-and-connected-groups
+
+> A virtual network can be peered up to 1000 virtual networks using Azure Virtual Network Manager's hub and spoke topology. This means that you can peer up to 1000 spoke virtual networks to a hub virtual network.
+By default, a connected group can have up to 250 virtual networks. This is a soft limit and can be increased up to 1000 virtual networks by submitting a request using this form.
